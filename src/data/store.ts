@@ -115,11 +115,12 @@ function subscribe(l: () => void) {
 export const usesSupabase = hasSupabase;
 
 export function useStore<T>(selector: (s: State) => T): T {
-  return useSyncExternalStore(
-    subscribe,
-    () => selector(state),
-    () => selector(state),
-  );
+  // getSnapshot must return a STABLE reference between emits, or
+  // useSyncExternalStore infinite-loops. So we snapshot the whole `state`
+  // (its ref only changes on emit) and run the selector during render —
+  // selectors returning fresh arrays (.filter/.map) are then harmless.
+  const snapshot = useSyncExternalStore(subscribe, () => state, () => state);
+  return selector(snapshot);
 }
 
 export function competitorName(id: string | null): string {
