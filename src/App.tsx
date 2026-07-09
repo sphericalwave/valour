@@ -34,6 +34,9 @@ export default function App() {
   // Apply the current event's palette as CSS variables — re-themes the whole
   // app when you switch tournaments.
   const themeVars = {
+    "--bg": event.palette.bg,
+    "--surface": event.palette.surface,
+    "--text": event.palette.text,
     "--accent": event.palette.accent,
     "--accent-2": event.palette.accent2,
   } as React.CSSProperties;

@@ -23,8 +23,9 @@ export default function SignIn() {
   return (
     <div className="container" style={{ maxWidth: 720 }}>
       <div className="center" style={{ margin: "32px 0 8px" }}>
-        <div className="display" style={{ fontSize: "2.6rem", color: "var(--accent)" }}>VALOUR</div>
-        <p className="muted">Run jiu-jitsu tournaments. Pick a role to explore the demo —{" "}
+        <img src={`${import.meta.env.BASE_URL}valour-logo.png`} alt="Valour Series Jiu-Jitsu"
+          style={{ width: 220, maxWidth: "70%" }} />
+        <p className="muted" style={{ marginTop: 12 }}>Run jiu-jitsu tournaments. Pick a role to explore the demo —{" "}
           <strong>no password needed</strong>.</p>
       </div>
 

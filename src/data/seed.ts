@@ -8,27 +8,28 @@ import type {
   StaffMember,
 } from "./types";
 
-// Belt-inspired combat palettes. Swap `palette` per event to re-theme instantly.
-const combat = {
-  bg: "#0c0d10",
-  surface: "#16181d",
-  accent: "#e4b53d", // gold
-  accent2: "#c0392b", // blood red
-  text: "#f2f3f5",
+// Palette sampled from the Valour Series banner art (gold #e1b050 / bronze
+// #8a6a30 on warm near-black). Swap `accent`/`accent2` per event to re-theme.
+const goldBase = {
+  bg: "#0a0a0b",
+  surface: "#141312",
+  accent: "#e1b050", // metallic gold
+  accent2: "#8a6a30", // deep bronze
+  text: "#f6f5f5",
 };
 
 export const events: EventInfo[] = [
   {
     id: "ev-valour-open",
-    name: "Valour Open — Winter Championship",
-    date: "2026-02-14",
+    name: "Valour Series — Summer Open 2026",
+    date: "2026-07-11",
     venue: "Iron Fortress Arena",
     city: "Austin, TX",
-    organizer: "Valour BJJ",
+    organizer: "Valour Series Jiu-Jitsu",
     status: "live",
     gi: true,
-    bannerText: "VALOUR OPEN",
-    palette: combat,
+    bannerText: "SUMMER OPEN",
+    palette: { ...goldBase, banner: "valour-banner.png" },
     entries: 214,
     revenueCents: 1712000,
   },
@@ -42,7 +43,7 @@ export const events: EventInfo[] = [
     status: "upcoming",
     gi: false,
     bannerText: "NO-GI CLASH",
-    palette: { ...combat, accent: "#3da5e4", accent2: "#8e44ad" },
+    palette: { ...goldBase, accent: "#3da5e4", accent2: "#1f6f9e" },
     entries: 96,
     revenueCents: 768000,
   },
@@ -56,7 +57,7 @@ export const events: EventInfo[] = [
     status: "complete",
     gi: true,
     bannerText: "KIDS CUP",
-    palette: { ...combat, accent: "#2ecc71", accent2: "#e67e22" },
+    palette: { ...goldBase, accent: "#37c26e", accent2: "#1f7d46" },
     entries: 132,
     revenueCents: 858000,
   },

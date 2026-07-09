@@ -12,32 +12,47 @@ export default function EventLanding() {
 
   return (
     <div className="container">
-      {/* Banner — palette comes from the event, so this reskins per tournament */}
-      <div style={{
-        borderRadius: "var(--radius)",
-        overflow: "hidden",
-        border: "1px solid var(--border)",
-        background: `linear-gradient(135deg, ${event.palette.accent2} 0%, #0c0d10 55%, ${event.palette.accent} 160%)`,
-      }}>
-        <div style={{ padding: "48px 28px", backdropFilter: "brightness(0.9)" }}>
-          <div className="row" style={{ gap: 10 }}>
-            <span className="pill" style={{ background: "rgba(0,0,0,0.4)", borderColor: "transparent" }}>
-              {event.gi ? "Gi" : "No-Gi"}
-            </span>
+      {/* Banner — real event artwork when the event has one, else a themed hero */}
+      {event.palette.banner ? (
+        <div style={{ borderRadius: "var(--radius)", overflow: "hidden", border: "1px solid var(--border)", background: "#000" }}>
+          <img src={`${import.meta.env.BASE_URL}${event.palette.banner}`} alt={event.name}
+            style={{ width: "100%", display: "block" }} />
+          <div className="row wrap spread" style={{ gap: 12, padding: "14px 18px", background: "var(--surface)" }}>
+            <div className="row wrap muted" style={{ gap: 18, fontSize: "0.92rem" }}>
+              <span>📅 {shortDate(event.date)}</span>
+              <span>📍 {event.venue}, {event.city}</span>
+              <span>🏳️ {event.organizer}</span>
+            </div>
             {event.status === "live" && <span className="pill live">Live now</span>}
-            {event.status === "upcoming" && <span className="pill accent">Registration open</span>}
-          </div>
-          <div className="display" style={{ fontSize: "clamp(2.4rem, 8vw, 4.5rem)", marginTop: 12, textShadow: "0 4px 24px rgba(0,0,0,0.6)" }}>
-            {event.bannerText}
-          </div>
-          <h1 style={{ fontWeight: 500, fontSize: "1.2rem", marginTop: 4 }}>{event.name}</h1>
-          <div className="row wrap muted" style={{ gap: 18, marginTop: 8, fontSize: "0.95rem" }}>
-            <span>📅 {shortDate(event.date)}</span>
-            <span>📍 {event.venue}, {event.city}</span>
-            <span>🏳️ {event.organizer}</span>
           </div>
         </div>
-      </div>
+      ) : (
+        <div style={{
+          borderRadius: "var(--radius)",
+          overflow: "hidden",
+          border: "1px solid var(--border)",
+          background: `linear-gradient(135deg, ${event.palette.accent2} 0%, ${event.palette.bg} 55%, ${event.palette.accent} 160%)`,
+        }}>
+          <div style={{ padding: "48px 28px", backdropFilter: "brightness(0.9)" }}>
+            <div className="row" style={{ gap: 10 }}>
+              <span className="pill" style={{ background: "rgba(0,0,0,0.4)", borderColor: "transparent" }}>
+                {event.gi ? "Gi" : "No-Gi"}
+              </span>
+              {event.status === "live" && <span className="pill live">Live now</span>}
+              {event.status === "upcoming" && <span className="pill accent">Registration open</span>}
+            </div>
+            <div className="display" style={{ fontSize: "clamp(2.4rem, 8vw, 4.5rem)", marginTop: 12, textShadow: "0 4px 24px rgba(0,0,0,0.6)" }}>
+              {event.bannerText}
+            </div>
+            <h1 style={{ fontWeight: 500, fontSize: "1.2rem", marginTop: 4 }}>{event.name}</h1>
+            <div className="row wrap muted" style={{ gap: 18, marginTop: 8, fontSize: "0.95rem" }}>
+              <span>📅 {shortDate(event.date)}</span>
+              <span>📍 {event.venue}, {event.city}</span>
+              <span>🏳️ {event.organizer}</span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Quick info tabs (static, mirrors Smoothcomp event surfaces) */}
       <div className="grid cols-4" style={{ marginTop: 20 }}>

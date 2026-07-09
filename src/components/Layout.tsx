@@ -44,8 +44,10 @@ export default function Layout() {
         <div className="container" style={{ padding: "12px 20px" }}>
           <div className="row spread wrap">
             <div className="row">
-              <Link to="/" className="display" style={{ color: "var(--accent)", fontSize: "1.4rem" }}>VALOUR</Link>
-              <span className="muted" style={{ fontSize: "0.82rem" }}>· {event.name}</span>
+              <Link to="/" className="row" style={{ gap: 8 }}>
+                <img src={`${import.meta.env.BASE_URL}valour-logo.png`} alt="Valour" style={{ height: 30 }} />
+              </Link>
+              <span className="muted" style={{ fontSize: "0.82rem" }}>{event.name}</span>
             </div>
             <div className="row wrap">
               {navByRole[role].map((n) => (

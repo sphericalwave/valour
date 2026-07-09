@@ -2,14 +2,14 @@
    at runtime (see ThemeVars in App.tsx), so re-skinning an event = swap tokens. */
 
 :root {
-  --bg: #0c0d10;
-  --surface: #16181d;
-  --surface-2: #1e2128;
-  --border: #2a2e37;
-  --text: #f2f3f5;
-  --muted: #8b9099;
-  --accent: #e4b53d;
-  --accent-2: #c0392b;
+  --bg: #0a0a0b;
+  --surface: #141312;
+  --surface-2: #1e1b16;
+  --border: #302b22;
+  --text: #f6f5f5;
+  --muted: #9a948a;
+  --accent: #e1b050;
+  --accent-2: #8a6a30;
   --ok: #2ecc71;
   --warn: #e67e22;
   --live: #ff3b3b;
@@ -28,8 +28,8 @@ html, body, #root { height: 100%; }
 body {
   margin: 0;
   background:
-    radial-gradient(1200px 600px at 80% -10%, rgba(228, 181, 61, 0.08), transparent 60%),
-    radial-gradient(900px 500px at -10% 10%, rgba(192, 57, 43, 0.08), transparent 55%),
+    radial-gradient(1200px 600px at 80% -10%, rgba(225, 176, 80, 0.10), transparent 60%),
+    radial-gradient(900px 500px at -10% 10%, rgba(138, 106, 48, 0.10), transparent 55%),
     var(--bg);
   color: var(--text);
   font-family: var(--font);

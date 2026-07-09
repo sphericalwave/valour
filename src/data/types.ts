@@ -10,6 +10,7 @@ export interface Palette {
   accent: string;
   accent2: string;
   text: string;
+  banner?: string; // optional hero image filename in /public (rides in the palette jsonb)
 }
 
 export interface EventInfo {
