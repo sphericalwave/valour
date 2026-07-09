@@ -1,0 +1,18 @@
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { HashRouter } from "react-router-dom";
+import App from "./App";
+import { RoleProvider } from "./auth/RoleContext";
+import "./styles/global.css";
+
+// HashRouter keeps client routing working on GitHub Pages without a server
+// rewrite / 404.html trick.
+ReactDOM.createRoot(document.getElementById("root")!).render(
+  <React.StrictMode>
+    <HashRouter>
+      <RoleProvider>
+        <App />
+      </RoleProvider>
+    </HashRouter>
+  </React.StrictMode>,
+);
