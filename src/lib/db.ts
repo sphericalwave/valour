@@ -112,14 +112,15 @@ export async function loadMatches(): Promise<Match[] | null> {
 }
 
 // First-run seed: push the bundled demo dataset into an empty project.
+// Upsert (not insert) so simultaneous first-loaders don't collide.
 export async function seedAll(s: Snapshot): Promise<void> {
   if (!supabase) return;
-  await supabase.from("events").insert(s.events.map(fromEvent));
-  await supabase.from("divisions").insert(s.divisions.map(fromDivision));
-  await supabase.from("competitors").insert(s.competitors.map(fromCompetitor));
-  await supabase.from("registrations").insert(s.registrations.map(fromRegistration));
-  await supabase.from("matches").insert(s.matches.map(fromMatch));
-  await supabase.from("staff").insert(s.staff.map(fromStaff));
+  await supabase.from("events").upsert(s.events.map(fromEvent));
+  await supabase.from("divisions").upsert(s.divisions.map(fromDivision));
+  await supabase.from("competitors").upsert(s.competitors.map(fromCompetitor));
+  await supabase.from("registrations").upsert(s.registrations.map(fromRegistration));
+  await supabase.from("matches").upsert(s.matches.map(fromMatch));
+  await supabase.from("staff").upsert(s.staff.map(fromStaff));
 }
 
 // --- Write-through helpers (fire-and-forget from the store) ----------------
