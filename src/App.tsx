@@ -19,7 +19,17 @@ import Checkout from "./pages/Checkout";
 export default function App() {
   const { role } = useRole();
   const event = useStore(currentEvent);
+  const ready = useStore((s) => s.ready);
   const loc = useLocation();
+
+  if (!ready) {
+    return (
+      <div className="container center" style={{ paddingTop: 120 }}>
+        <div className="display" style={{ fontSize: "2rem", color: "var(--accent)" }}>VALOUR</div>
+        <p className="muted">Loading event data…</p>
+      </div>
+    );
+  }
 
   // Apply the current event's palette as CSS variables — re-themes the whole
   // app when you switch tournaments.

@@ -1,12 +1,14 @@
 import { useSyncExternalStore } from "react";
 import * as seed from "./seed";
 import type { Match, StaffMember } from "./types";
-import { hasSupabase } from "../lib/supabase";
+import { hasSupabase, supabase } from "../lib/supabase";
+import * as db from "../lib/db";
 
-// In-memory store seeded from ./seed. Mutations notify subscribers so the UI
-// (brackets, scoreboard, payouts) updates live. When Supabase env vars are set,
-// `usesSupabase` is true and the same shapes would be backed by Postgres — the
-// component code is identical; only this module's guts change.
+// In-memory store, seeded from ./seed. Mutations notify subscribers so the UI
+// (brackets, scoreboard, payouts) updates live. When Supabase is configured the
+// store bootstraps from Postgres, writes through on every mutation, and
+// subscribes to realtime so edits sync across devices. Component code is
+// identical either way — only this module's guts change.
 
 interface State {
   events: typeof seed.events;
@@ -16,6 +18,7 @@ interface State {
   matches: Match[];
   staff: StaffMember[];
   currentEventId: string;
+  ready: boolean;
 }
 
 let state: State = {
@@ -26,7 +29,52 @@ let state: State = {
   matches: structuredClone(seed.matches),
   staff: structuredClone(seed.staff),
   currentEventId: seed.events[0].id,
+  // Local-only mode is ready immediately; Supabase mode flips ready after load.
+  ready: !hasSupabase,
 };
+
+// Load from Supabase (or seed an empty project from the bundled data), then
+// start realtime. No-op in local demo mode.
+export async function bootstrap(): Promise<void> {
+  if (!hasSupabase) return;
+  try {
+    const snap = await db.loadAll();
+    if (snap && snap.events.length > 0) {
+      state = {
+        ...state,
+        events: snap.events, divisions: snap.divisions, competitors: snap.competitors,
+        registrations: snap.registrations, matches: snap.matches, staff: snap.staff,
+        currentEventId: snap.events[0].id,
+      };
+    } else if (snap) {
+      // Empty project — seed it from the bundled demo data (state already holds it).
+      await db.seedAll({
+        events: state.events, divisions: state.divisions, competitors: state.competitors,
+        registrations: state.registrations, matches: state.matches, staff: state.staff,
+      });
+    }
+    startRealtime();
+  } catch (e) {
+    console.error("bootstrap failed, falling back to local data:", e);
+  } finally {
+    state.ready = true;
+    emit();
+  }
+}
+
+let realtimeStarted = false;
+function startRealtime() {
+  if (!supabase || realtimeStarted) return;
+  realtimeStarted = true;
+  supabase
+    .channel("valour-matches")
+    .on("postgres_changes", { event: "*", schema: "public", table: "matches" }, () => {
+      void db.loadMatches().then((m) => {
+        if (m) { state.matches = m; emit(); }
+      });
+    })
+    .subscribe();
+}
 
 export function setCurrentEvent(eventId: string) {
   state.currentEventId = eventId;
@@ -43,14 +91,13 @@ export function cloneEvent(eventId: string): string {
   const src = state.events.find((e) => e.id === eventId);
   if (!src) return eventId;
   const newId = `ev-clone-${cloneCounter++}`;
-  state.events = [
-    ...state.events,
-    { ...src, id: newId, name: `${src.name} (copy)`, status: "upcoming", entries: 0, revenueCents: 0 },
-  ];
+  const newEvent = { ...src, id: newId, name: `${src.name} (copy)`, status: "upcoming" as const, entries: 0, revenueCents: 0 };
+  state.events = [...state.events, newEvent];
   const newDivs = state.divisions
     .filter((d) => d.eventId === eventId)
     .map((d, i) => ({ ...d, id: `${newId}-div${i}`, eventId: newId }));
   state.divisions = [...state.divisions, ...newDivs];
+  db.insertEventWithDivisions(newEvent, newDivs);
   emit();
   return newId;
 }
@@ -92,6 +139,7 @@ export function bumpScore(matchId: string, field: ScoreField, delta: number) {
   if (!m) return;
   m[field] = Math.max(0, m[field] + delta);
   if (m.status === "pending") m.status = "live";
+  db.saveMatches([m]);
   emit();
 }
 
@@ -101,21 +149,24 @@ export function finishMatch(matchId: string, winnerId: string, method: Match["me
   m.winnerId = winnerId;
   m.method = method;
   m.status = "complete";
-  advanceWinner(m, winnerId);
+  const next = advanceWinner(m, winnerId);
+  db.saveMatches(next ? [m, next] : [m]);
   emit();
 }
 
 // Standard single-elim advancement: winner of (round r, slot s) goes to
 // (round r-1, slot ceil(s/2)); odd slot -> side A, even slot -> side B.
-function advanceWinner(m: Match, winnerId: string) {
-  if (m.round === 0) return;
+// Returns the match the winner advanced into, if any.
+function advanceWinner(m: Match, winnerId: string): Match | null {
+  if (m.round === 0) return null;
   const nextSlot = Math.ceil(m.slot / 2);
   const next = state.matches.find(
     (x) => x.divisionId === m.divisionId && x.round === m.round - 1 && x.slot === nextSlot,
   );
-  if (!next) return;
+  if (!next) return null;
   if (m.slot % 2 === 1) next.competitorA = winnerId;
   else next.competitorB = winnerId;
+  return next;
 }
 
 // --- Bracket generation ----------------------------------------------------
@@ -181,6 +232,8 @@ export function generateBracket(divisionId: string) {
     }
   });
 
+  db.deleteMatchesForDivision(divisionId);
+  db.saveMatches(fresh);
   emit();
 }
 
@@ -191,6 +244,7 @@ export function setSlot(matchId: string, side: "A" | "B", competitorId: string |
   if (!m) return;
   if (side === "A") m.competitorA = competitorId;
   else m.competitorB = competitorId;
+  db.saveMatches([m]);
   emit();
 }
 
@@ -198,20 +252,24 @@ export function setSlot(matchId: string, side: "A" | "B", competitorId: string |
 
 export function markRegistrationPaid(registrationId: string) {
   const r = state.registrations.find((x) => x.id === registrationId);
-  if (r) r.paymentStatus = "paid";
+  if (!r) return;
+  r.paymentStatus = "paid";
+  db.saveRegistration(r);
   emit();
 }
 
 export function payStaff(staffId: string) {
   const s = state.staff.find((x) => x.id === staffId);
-  if (s) s.payStatus = "paid";
+  if (!s) return;
+  s.payStatus = "paid";
+  db.saveStaff([s]);
   emit();
 }
 
 export function payAllStaff(eventId: string) {
-  state.staff.forEach((s) => {
-    if (s.eventId === eventId) s.payStatus = "paid";
-  });
+  const affected = state.staff.filter((s) => s.eventId === eventId);
+  affected.forEach((s) => { s.payStatus = "paid"; });
+  db.saveStaff(affected);
   emit();
 }
 
