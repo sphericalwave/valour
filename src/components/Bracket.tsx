@@ -52,7 +52,7 @@ function MatchCard({ match, editable, onPickWinner }:
       <div className="row spread" style={{ padding: "6px 10px", background: "var(--surface-2)", fontSize: "0.7rem" }}>
         <span className="muted">Mat {match.mat}</span>
         {live && <span className="pill live">Live</span>}
-        {match.status === "complete" && <span className="muted" style={{ textTransform: "uppercase" }}>{match.method}</span>}
+        {match.status === "complete" && <span className="muted" style={{ textTransform: "uppercase" }}>{match.method ?? "bye"}</span>}
         {match.status === "pending" && <span className="muted">Upcoming</span>}
       </div>
       <Slot match={match} side="A" editable={editable} onPickWinner={onPickWinner} />

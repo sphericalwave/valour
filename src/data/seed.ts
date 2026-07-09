@@ -1,4 +1,5 @@
 import type {
+  Belt,
   Competitor,
   Division,
   EventInfo,
@@ -228,6 +229,48 @@ export const registrations: Registration[] = [
   { id: "r2", competitorId: "c2", divisionId: "div-blue-mid", paymentStatus: "paid" },
   { id: "r3", competitorId: "c1", divisionId: "div-purple-light", paymentStatus: "pending" },
 ];
+
+// Entrant pools for the other divisions so an admin can seed a real bracket.
+// (7 in white/feather → exercises a bye; 4 in the women's division → clean 4-man.)
+const pools: { divisionId: string; belt: Belt; weight: number; roster: [string, string][] }[] = [
+  {
+    divisionId: "div-purple-light",
+    belt: "purple",
+    weight: 75,
+    roster: [
+      ["Nate Boyd", "Gracie Barra"], ["Favio Nunes", "Atos"], ["Cole Prince", "Alliance"],
+      ["Yuki Tanaka", "10th Planet"], ["Rob Deacon", "Checkmat ATX"], ["Ivan Petrov", "Iron Fortress"],
+    ],
+  },
+  {
+    divisionId: "div-white-fea",
+    belt: "white",
+    weight: 69,
+    roster: [
+      ["Chris Hale", "Iron Fortress"], ["Danny Ortiz", "Southside Dojo"], ["Owen Blake", "Gracie Barra"],
+      ["Priyansh Rao", "Atos"], ["Mateo Silva", "Alliance"], ["Jon Weir", "Checkmat ATX"],
+      ["Kwame Osei", "10th Planet"],
+    ],
+  },
+  {
+    divisionId: "div-women-blue",
+    belt: "blue",
+    weight: 58,
+    roster: [
+      ["Ana Reyes", "Iron Fortress"], ["Mei Lin", "Atos"], ["Sofia Castro", "Gracie Barra"],
+      ["Hana Novak", "Alliance"],
+    ],
+  },
+];
+
+let poolCid = 100;
+for (const p of pools) {
+  for (const [name, team] of p.roster) {
+    const id = `c${poolCid++}`;
+    competitors.push({ id, name, team, belt: p.belt, weightKg: p.weight });
+    registrations.push({ id: `r-${id}`, competitorId: id, divisionId: p.divisionId, paymentStatus: "paid" });
+  }
+}
 
 export const staff: StaffMember[] = [
   { id: "s1", name: "Bianca Alves", eventId: "ev-valour-open", role: "ref", mat: 1, payType: "per_match", payRateCents: 1500, unitsWorked: 18, payStatus: "pending" },

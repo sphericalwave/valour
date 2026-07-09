@@ -118,6 +118,72 @@ function advanceWinner(m: Match, winnerId: string) {
   else next.competitorB = winnerId;
 }
 
+// --- Bracket generation ----------------------------------------------------
+
+function nextPow2(n: number): number {
+  let s = 1;
+  while (s < n) s *= 2;
+  return Math.max(2, s);
+}
+
+function blankMatch(divisionId: string, round: number, slot: number, mat: number): Match {
+  return {
+    id: `${divisionId}-r${round}-s${slot}`,
+    divisionId, round, slot,
+    competitorA: null, competitorB: null, winnerId: null, method: null,
+    pointsA: 0, pointsB: 0, advA: 0, advB: 0, penA: 0, penB: 0,
+    mat, status: "pending",
+  };
+}
+
+// Build a single-elimination bracket from a division's registrations.
+// Pads to the next power of two; solo first-round matches are byes that
+// auto-advance. Overwrites any existing bracket for the division.
+export function generateBracket(divisionId: string) {
+  const entrants = state.registrations
+    .filter((r) => r.divisionId === divisionId)
+    .map((r) => r.competitorId);
+  state.matches = state.matches.filter((m) => m.divisionId !== divisionId);
+  if (entrants.length < 2) {
+    emit();
+    return;
+  }
+
+  const size = nextPow2(entrants.length);
+  const firstRound = Math.log2(size) - 1;
+  const fresh: Match[] = [];
+  let mat = 0;
+  for (let round = firstRound; round >= 0; round--) {
+    for (let slot = 1; slot <= 2 ** round; slot++) {
+      fresh.push(blankMatch(divisionId, round, slot, (mat++ % 2) + 1));
+    }
+  }
+
+  const padded: (string | null)[] = [...entrants];
+  while (padded.length < size) padded.push(null);
+
+  const first = fresh.filter((m) => m.round === firstRound).sort((a, b) => a.slot - b.slot);
+  first.forEach((m, i) => {
+    m.competitorA = padded[i * 2] ?? null;
+    m.competitorB = padded[i * 2 + 1] ?? null;
+  });
+
+  state.matches = [...state.matches, ...fresh];
+
+  // Auto-advance byes (exactly one competitor present).
+  first.forEach((m) => {
+    const solo = m.competitorA && !m.competitorB ? m.competitorA
+      : !m.competitorA && m.competitorB ? m.competitorB : null;
+    if (solo) {
+      m.status = "complete";
+      m.winnerId = solo;
+      advanceWinner(m, solo);
+    }
+  });
+
+  emit();
+}
+
 // --- Admin bracket edit ----------------------------------------------------
 
 export function setSlot(matchId: string, side: "A" | "B", competitorId: string | null) {

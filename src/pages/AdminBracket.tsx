@@ -1,11 +1,12 @@
 import { Link, useParams } from "react-router-dom";
-import { useStore, finishMatch } from "../data/store";
+import { useStore, finishMatch, generateBracket } from "../data/store";
 import Bracket from "../components/Bracket";
 
 export default function AdminBracket() {
   const { divisionId } = useParams();
   const division = useStore((s) => s.divisions.find((d) => d.id === divisionId));
   const hasMatches = useStore((s) => s.matches.some((m) => m.divisionId === divisionId));
+  const entrantCount = useStore((s) => s.registrations.filter((r) => r.divisionId === divisionId).length);
   const liveMatch = useStore((s) => s.matches.find((m) => m.divisionId === divisionId && m.status === "live"));
 
   if (!division) return <div className="container">Division not found.</div>;
@@ -41,8 +42,14 @@ export default function AdminBracket() {
         <div className="card center pad-lg" style={{ marginTop: 16 }}>
           <div style={{ fontSize: "2rem" }}>🗂️</div>
           <h3>No bracket generated yet</h3>
-          <p className="muted">Seed this division once registration closes to build the single-elimination bracket.</p>
-          <button className="btn primary" disabled>Generate bracket (demo)</button>
+          <p className="muted">
+            {entrantCount} registered. Seed this division to build the single-elimination bracket
+            (byes added automatically).
+          </p>
+          <button className="btn primary" disabled={entrantCount < 2}
+            onClick={() => generateBracket(division.id)}>
+            Generate bracket ({entrantCount} entrants)
+          </button>
         </div>
       )}
     </div>
