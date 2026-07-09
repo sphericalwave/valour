@@ -2,7 +2,7 @@
 
 Run jiu-jitsu tournaments end to end: registration & payments, live brackets, referee scoring, staff payouts, multi-event management, and an organizer stats dashboard. A self-owned alternative to Smoothcomp.
 
-> **Live demo:** _add your GitHub Pages URL here after first deploy_ → `https://<user>.github.io/valour/`
+> **Live demo:** **https://sphericalwave.com/valour/**
 > **No password needed** — the demo opens with a "Sign in as…" screen. Pick **Competitor / Referee / Admin / Staff** and explore.
 
 ---
