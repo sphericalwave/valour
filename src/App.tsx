@@ -15,6 +15,7 @@ import EventStats from "./pages/EventStats";
 import EventSwitcher from "./pages/EventSwitcher";
 import PublicBracket from "./pages/PublicBracket";
 import Checkout from "./pages/Checkout";
+import Replays from "./pages/Replays";
 
 export default function App() {
   const { role } = useRole();
@@ -63,6 +64,7 @@ export default function App() {
           <Route path="/admin/bracket/:divisionId" element={<AdminBracket />} />
           <Route path="/bracket/:divisionId" element={<PublicBracket />} />
           <Route path="/register/:divisionId" element={<Checkout />} />
+          <Route path="/replays" element={<Replays />} />
           <Route path="*" element={<Navigate to="/event" replace />} />
         </Route>
       </Routes>
