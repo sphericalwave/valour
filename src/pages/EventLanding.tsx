@@ -62,6 +62,14 @@ export default function EventLanding() {
         <Info label="Mats" value="2" />
       </div>
 
+      <Link to="/replays" className="card row spread wrap" style={{ gap: 12, marginTop: 16, borderColor: "var(--accent-2)" }}>
+        <div>
+          <div style={{ fontWeight: 700 }}>▶ Replays &amp; photos</div>
+          <div className="muted" style={{ fontSize: "0.85rem" }}>Search any athlete and jump straight to their matches.</div>
+        </div>
+        <span className="btn sm primary">Watch</span>
+      </Link>
+
       <div className="section-title">Divisions</div>
       <div className="stack">
         {divisions.map((d) => (

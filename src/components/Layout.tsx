@@ -8,14 +8,17 @@ const navByRole: Record<Role, { to: string; label: string }[]> = {
   competitor: [
     { to: "/me", label: "My event" },
     { to: "/event", label: "Event page" },
+    { to: "/replays", label: "Replays" },
   ],
   ref: [
     { to: "/ref", label: "My mat" },
     { to: "/event", label: "Event page" },
+    { to: "/replays", label: "Replays" },
   ],
   staff: [
     { to: "/staff", label: "My shift" },
     { to: "/event", label: "Event page" },
+    { to: "/replays", label: "Replays" },
   ],
   admin: [
     { to: "/admin", label: "Overview" },
@@ -23,6 +26,7 @@ const navByRole: Record<Role, { to: string; label: string }[]> = {
     { to: "/admin/staff", label: "Staff & pay" },
     { to: "/admin/stats", label: "Stats" },
     { to: "/event", label: "Public page" },
+    { to: "/replays", label: "Replays" },
   ],
 };
 
